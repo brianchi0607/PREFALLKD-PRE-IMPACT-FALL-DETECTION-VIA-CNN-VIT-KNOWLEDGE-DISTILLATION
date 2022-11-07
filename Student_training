@@ -1,11 +1,3 @@
-
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Sep 18 12:48:22 2022
-
-@author: UJ
-"""
-
 import numpy as np
 from sklearn import metrics
 from matplotlib import pyplot as plt
@@ -21,6 +13,10 @@ import os
 from torch.optim import AdamW
 import random
 import copy
+import math
+from torch.optim import Optimizer
+from torch.optim.lr_scheduler import LambdaLR
+
 #%% Set GPU
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' #close info+warning
 os.environ['CUDA_LAUNCH_BLOCKING'] = '1' #close info
@@ -29,14 +25,15 @@ config = tf.compat.v1.ConfigProto()
 config.gpu_options.allow_growth=True
 device = torch.device('cuda' if torch.cuda.is_available else 'cpu')
 #%% Read file
-path = r'C:\Users\UJ\Desktop\KFall_data'
-train_data = np.load(path+'\\student_train_data.npy')
-train_gt = np.load(path+'\\student_train_label.npy')
-train_sub = np.load(path+'\student_train_sub.npy')
+path = r''
+train_data = np.load(path+'\\.npy')
+train_gt = np.load(path+'\\.npy')
+train_sub = np.load(path+'\\.npy')
 
-test_data = np.load(path+'\\final_test_data.npy')
-test_gt = np.load(path+'\\final_test_label.npy')
-test_sub = np.load(path+'\\final_test_sub.npy')
+test_data = np.load(path+'\\.npy')
+test_gt = np.load(path+'\\.npy')
+test_sub = np.load(path+'\\.npy')
+
 #%% Show confusion matrix
 def show_CM(validation,prediction):
     matrix = metrics.confusion_matrix(validation,prediction)
@@ -48,6 +45,7 @@ def show_CM(validation,prediction):
     plt.xlabel('Prediction')
     plt.plot()
     plt.show()
+    
 #%% Random seed 
 def seed_everything(seed=24):
     random.seed(seed           )
@@ -58,13 +56,9 @@ def seed_everything(seed=24):
     # Some cudnn methods can be random even after fixing the seed 
     # unless you tell it to be deterministic
     torch.backends.cudnn.deterministic = True
-
 seed_everything(113)
-#%% Cosine learning rate schedule with warmup
-import math
-from torch.optim import Optimizer
-from torch.optim.lr_scheduler import LambdaLR
 
+#%% Cosine learning rate schedule with warmup
 def get_cosine_schedule_with_warmup(
   optimizer: Optimizer, # The optimizer for which to schedule the learning rate.
   num_warmup_steps: int, # The number of steps for the warmup phase.
@@ -86,6 +80,7 @@ def get_cosine_schedule_with_warmup(
     )
 
   return LambdaLR(optimizer, lr_lambda, last_epoch)    
+
 #%% Testing process
 def evaluate(model, device, criterion, test_loader):
     with torch.no_grad():
@@ -123,6 +118,7 @@ def evaluate(model, device, criterion, test_loader):
             "Val F1: {:.5f}".format(f1_score(val_gt, val_preds)))       
     
     return val_preds, val_gt, val_losses,  ori_preds   
+    
 #%% Define student model
 class CNN1D(nn.Module):
     def __init__(self):
@@ -161,7 +157,8 @@ class CNN1D(nn.Module):
         x = x.view(x.size(0), -1)
         x = self.fc1(x)
     
-        return x   
+        return x 
+        
 #%% Focal loss function
 class focal_loss(nn.Module):
     def __init__(self, alpha=[0.25,0.75], gamma=2, num_classes=2, size_average=True):
@@ -210,6 +207,7 @@ class focal_loss(nn.Module):
         else:
             loss = loss.sum()
         return loss 
+
 #%% Main
 config1 = {
     'epochs': 100,
@@ -317,6 +315,7 @@ print("Train Acc: {:.5f}".format(accuracy_score(train_gt, train_preds)),
     "Val Rcll: {:.5f}".format(recall_score(val_gt, val_preds)),
     "Val F1: {:.5f}".format(f1_score(val_gt, val_preds)))
 show_CM(val_gt, val_preds)
+
 #%% lead time
 lead = []
 for i in range(len(ori_preds)):
@@ -327,10 +326,10 @@ for i in range(len(ori_preds)):
             lead.append(20)
         elif (val_gt[i-1] == val_gt[i-2] == 1) and (ori_preds[i-1] == ori_preds[i-2] == 0):
             lead.append(30)
-           
 lead = np.array(lead)            
 print(lead.mean())
 print(lead.std()) 
+
 #%%flops
 from ptflops import get_model_complexity_info
 flops1, params1 = get_model_complexity_info(model, (50,9), as_strings=False, print_per_layer_stat=True)
