@@ -136,31 +136,6 @@ def main(Adls, falls):
 original_train_data, original_train_gt, original_train_sub, original_test_data, original_test_gt, original_test_sub = main(or_Adls, or_falls)
 original_train_data_norm = copy.deepcopy(original_train_data)  
 
-# #%%
-# for i in tqdm(range(len(original_train_data))):
-#     for j in range(9):
-#         mean = np.mean(original_train_data[:,:,j])
-#         std = np.std(original_train_data[:,:,j])
-#         # minn = np.min(original_train_data[:,:,j])
-#         # maxx = np.max(original_train_data[:,:,j])
-#         # ss = maxx-minn
-#         for k in range(len(original_train_data[i])):
-#             a = (original_train_data[i,k,j] - mean)/(std)    
-#             original_train_data_norm[i,k,j] = a
-# np.save(path+'\\KFall_original_train_data_norm',original_train_data_norm)
-# #%%
-# original_test_data_norm = copy.deepcopy(original_test_data)
-# for i in tqdm(range(len(original_test_data))):
-#     for j in range(9):
-#         mean = np.mean(original_test_data[:,:,j])
-#         std = np.std(original_test_data[:,:,j])
-#         # minn = np.min(original_test_data[:,:,j])
-#         # maxx = np.max(original_test_data[:,:,j])
-#         # ss = maxx-minn
-#         for k in range(len(original_test_data[i])):
-#             a = (original_test_data[i,k,j] - mean)/(std)    
-#             original_test_data_norm[i,k,j] = a          
-# np.save(path+'\\KFall_final_test_data_norm',original_test_data_norm)
 #%%
 gaussian_train_data = copy.deepcopy(original_train_data)
 for i in range(len(gaussian_train_data[0,0,:])):
