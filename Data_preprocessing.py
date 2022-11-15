@@ -3,7 +3,7 @@ import numpy as np
 import glob
 import copy
 
-#%%read file
+#%% Read File
 all_file = []
 SubjectID = []
 gt = []
@@ -31,7 +31,7 @@ Imp_Lab = pd.read_excel(r'.xlsx',engine ='openpyxl')
 su_a = np.load(r'.npy')
 su_f = np.load(r'.npy')
 
-#%% Gaussian noise
+#%% Gaussian Noise
 def gaussian_noise(data, mag = -2):
     BS, L = data.shape
     sigma = np.std(data, axis = 1)
@@ -40,7 +40,7 @@ def gaussian_noise(data, mag = -2):
     noise = 0.25*(1/(1+np.exp(-mag)))*sigma*n
     return data + noise
     
-#%% Magnitude scale
+#%% Magnitude Scale
 def magnitude_scale(x, mag):
     BS, L, C = x.shape
     bs = np.random.rand(BS)
@@ -49,11 +49,12 @@ def magnitude_scale(x, mag):
     strength = np.reshape(strength, (BS,1,1))
     return x*strength
 
-#%% Define ADL window 
+#%% Define the ADL windows 
 lon = 50
 Fall_onset_frame = np.array(Imp_Lab["Fall_onset_frame"])
 Impact_frame = np.array(Imp_Lab['Fall_impact_frame'])
 
+# Each ADL instance is divided into ten parts equally. Then, we captured a window with a size of 50 frames (0.5s) from each part. 
 def ADL_window(Adls):
     sliding_adl_data = []
     sliding_adl_sub = []
@@ -68,7 +69,7 @@ def ADL_window(Adls):
                 
     return sliding_adl_data, sliding_adl_gt, sliding_adl_sub  
     
-#%% fall window training   
+#%%  Define the fall windows of training dataset   
 def fall_window_training(falls, Fall_onset_frame, Impact_frame, lon, su_f): 
     preadl_data = []   
     preadl_gt = []
@@ -77,6 +78,7 @@ def fall_window_training(falls, Fall_onset_frame, Impact_frame, lon, su_f):
     prefall_data = []
     prefall_gt = []
     prefall_sub = []        
+    # Sliding window
     for i in range(len(falls)):
         for j in range(150):
             if lon+10*j < Fall_onset_frame[i] :
@@ -100,7 +102,7 @@ def fall_window_testing(falls, Fall_onset_frame, su_f, Impact_frame, lon):
                 test_data.append(falls[i][10*j:lon+10*j])
                 test_gt.append(0)
                 test_sub.append(su_f[i])
-                
+        # The first 3 pre-impact windows reaching over the fall onset moment in each fall instance were collected        
         for j in range(100):             
            if (lon+10*j - Fall_onset_frame[i] >= 5):
                test_data.append(falls[i][10*j:lon+10*j])
@@ -115,6 +117,7 @@ def fall_window_testing(falls, Fall_onset_frame, su_f, Impact_frame, lon):
                break
            
     return test_data, test_gt, test_sub
+   
 #%% main
 def main(Adls, falls):
     sliding_adl_data, sliding_adl_gt, sliding_adl_sub= ADL_window(Adls)
@@ -144,22 +147,11 @@ for i in range(len(gaussian_train_data[0,0,:])):
 mag_train_data = copy.deepcopy(original_train_data)
 mag_train_data = magnitude_scale(mag_train_data, mag = -0.5)        
 
-# rand_data, rand_gt, rand_sub = augmentation_resampling(original_train_data_norm, original_train_gt, original_train_sub, M=2, N=1, T=1)
-
 final_train_data =  np.concatenate((np.array(original_train_data), np.array(gaussian_train_data), np.array(mag_train_data)))     
 final_train_gt = np.concatenate((np.array(original_train_gt), np.array(original_train_gt), np.array(original_train_gt))) 
 final_train_sub = np.concatenate((np.array(original_train_sub), np.array(original_train_sub), np.array(original_train_sub)))   
-
-# final_train_data_norm = copy.deepcopy(final_train_data)  
-# for i in range(len(final_train_data)):
-#     for j in range(9):
-#         minn = np.min(final_train_data[:,:,j])
-#         maxx = np.max(final_train_data[:,:,j])
-#         ss = maxx-minn
-#         for k in range(len(final_train_data[i])):
-#             a = (final_train_data[i,k,j] - minn)/(ss)    
-#             final_train_data_norm[i,k,j] = a                                         
-path = r'C:\Users\UJ\Desktop\KFall_data'  
+                                    
+path = r''  
 np.save(path+'\\KFall_final_train_data',final_train_data)
 np.save(path+'\\KFall_final_train_gt',final_train_gt)
 np.save(path+'\\KFall_final_train_sub',final_train_sub) 
