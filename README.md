@@ -1,7 +1,7 @@
 # PREFALLKD:PRE-IMPACT FALL DETECTION VIA CNN-VIT KNOWLEDGE DISTILLATION
 
-### PreFallKD Framework
-![An overview of PreFallKD](/images/PreFallKD_framework.png)
+### An overview of proposed PreFallKD Framework 
+![PreFallKD](/images/PreFallKD_framework.png)
 
 # Requirements
 ```
