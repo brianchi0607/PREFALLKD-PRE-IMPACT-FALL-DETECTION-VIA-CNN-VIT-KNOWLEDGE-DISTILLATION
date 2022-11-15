@@ -1,4 +1,8 @@
 # PREFALLKD:PRE-IMPACT FALL DETECTION VIA CNN-VIT KNOWLEDGE DISTILLATION
+
+### PreFallKD Framework
+![PreFallKD](/images/PreFallKD_framework.png)
+
 # Requirements
 ```
 python == 3.9
