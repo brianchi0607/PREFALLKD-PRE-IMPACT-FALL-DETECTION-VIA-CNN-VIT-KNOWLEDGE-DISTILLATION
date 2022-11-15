@@ -2,6 +2,7 @@ import torch
 from torch import nn, einsum
 from einops import rearrange, repeat
 from einops.layers.torch import Rearrange
+
 #%% Norm
 class PreNorm(nn.Module):
     def __init__(self, dim, func):
@@ -10,6 +11,7 @@ class PreNorm(nn.Module):
         self.func = func
     def forward(self, x, **kwargs):
         return self.func(self.norm(x), **kwargs)
+        
 #%% FeedForward
 class FeedForward(nn.Module):
     def __init__(self, dim, hidden_dim, dropout = 0):
