@@ -15,4 +15,4 @@ pandas >= 1.4.3
 einops >= 0.4.1
 ``` 
 # Results
-![PreFallKD](/images/PreFallKD_table1.png)
+![PreFallKD](/images/PreFallKD_table1.PNG)
