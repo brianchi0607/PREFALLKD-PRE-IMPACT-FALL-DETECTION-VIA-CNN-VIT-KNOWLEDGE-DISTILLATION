@@ -11,6 +11,7 @@ or_Adls = []
 or_falls = []
 Adl = pd.DataFrame()
 fall = pd.DataFrame()
+lon = 50
 
 path = r''
 ADL_address = (glob.glob(path+'\All_Sub\*\ADL\*.csv'))
@@ -28,6 +29,8 @@ for i in range((len(fall_address))):
     gt.append(1)
 
 Imp_Lab = pd.read_excel(r'.xlsx',engine ='openpyxl')
+Fall_onset_frame = np.array(Imp_Lab["Fall_onset_frame"])
+Impact_frame = np.array(Imp_Lab['Fall_impact_frame'])
 su_a = np.load(r'.npy')
 su_f = np.load(r'.npy')
 
@@ -50,10 +53,6 @@ def magnitude_scale(x, mag):
     return x*strength
 
 #%% Define the ADL windows 
-lon = 50
-Fall_onset_frame = np.array(Imp_Lab["Fall_onset_frame"])
-Impact_frame = np.array(Imp_Lab['Fall_impact_frame'])
-
 # Each ADL instance is divided into ten parts equally. Then, we captured a window with a size of 50 frames (0.5s) from each part. 
 def ADL_window(Adls):
     sliding_adl_data = []
@@ -74,7 +73,6 @@ def fall_window_training(falls, Fall_onset_frame, Impact_frame, lon, su_f):
     preadl_data = []   
     preadl_gt = []
     preadl_sub = []
- 
     prefall_data = []
     prefall_gt = []
     prefall_sub = []        
@@ -115,7 +113,6 @@ def fall_window_testing(falls, Fall_onset_frame, su_f, Impact_frame, lon):
                test_gt.append(1)
                test_sub.append(su_f[i])
                break
-           
     return test_data, test_gt, test_sub
    
 #%% main
@@ -135,11 +132,12 @@ def main(Adls, falls):
     final_test_gt = np.concatenate((np.array(sliding_adl_gt), np.array(test_gt)))
     final_test_sub = np.concatenate((np.array(sliding_adl_sub), np.array(test_sub))) 
     return final_train_data, final_train_gt, final_train_sub, final_test_data, final_test_gt, final_test_sub
+   
 #%% load        
 original_train_data, original_train_gt, original_train_sub, original_test_data, original_test_gt, original_test_sub = main(or_Adls, or_falls)
 original_train_data_norm = copy.deepcopy(original_train_data)  
 
-#%%
+#%% Augmention
 gaussian_train_data = copy.deepcopy(original_train_data)
 for i in range(len(gaussian_train_data[0,0,:])):
     gaussian_train_data[:,:,i] = gaussian_noise(gaussian_train_data[:,:,i], mag = -0.5)
