@@ -17,3 +17,7 @@ einops >= 0.4.1
 # Results
 ![PreFallKD](/images/PreFallKD_table1.PNG)
 ![PreFallKD](/images/PreFallKD_table2.PNG)
+
+### Disclaimer
+
+This is still a work in progress and is far from being perfect: if you find any bug please don't hesitate to open an issue.
